@@ -1,106 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { ApiPage, addToCard,getProductsByCategory } from "../../API/Api";
-// import {
-//   Badge,
-//   Button,
-//   Card,
-//   Image,
-//   List,
-//   message,
-//   Rate,
-//   Spin,
-//   Typography,
-// } from "antd";
-// import "@ant-design/v5-patch-for-react-19";
-// import { useParams } from "react-router-dom";
-
-// function Products() {
-//   const params = useParams()
-//   console.log(params?.categoryId,"params")
-//   const [items, setItems] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   useEffect(() => {
-//     getProductsByCategory(params?.categoryId).then((res) => {
-//       setItems(res?.products);
-//       setLoading(false);
-//       console.log(res?.products,"adasdsa")
-//     });
-//   }, [params]);
-
-//   return (
-//     <Spin spinning={loading}>
-//       <List
-//         grid={{ column: 3 }}
-//         renderItem={(products, index) => {
-//           console.log(products,";dslkfjsdl;fjsdalfjsdlfk")
-//           return (
-//             <Badge.Ribbon
-//               className="itemCardBadge"
-//               color="red"
-//               text={products?.discountPercentage}
-//             >
-//               <Card
-//                 className="itemCard"
-//                 title={products?.title}
-//                 key={index}
-//                 cover={
-//                   <Image className="itemCardImage" src={products.thumbnail} />
-//                 }
-//                 actions={[
-//                   <Rate disabled allowHalf value={products?.rating}></Rate>,
-//                   <AddToCardAdd items={products} />,
-//                 ]}
-//               >
-//                 <Card.Meta
-//                   title={
-//                     <Typography.Paragraph>
-//                       Price: ${products?.price}{" "}
-//                       <Typography.Text delete type="danger">
-//                         $
-//                         {(
-//                           products?.price +
-//                           (products?.price * products?.discountPercentage) / 100
-//                         )?.toFixed(3)}
-//                       </Typography.Text>
-//                     </Typography.Paragraph>
-//                   }
-//                   description={
-//                     <Typography.Paragraph
-//                       ellipsis={{ rows: 2, expandable: true, symbol: "more" }}
-//                     >
-//                       {products?.description}
-//                     </Typography.Paragraph>
-//                   }
-//                 ></Card.Meta>
-//               </Card>
-//             </Badge.Ribbon>
-//           );
-//         }}
-//         dataSource={items}
-//       ></List>
-//     </Spin>
-//   );
-// }
-
-// const AddToCardAdd = ({ items }) => {
-//   const [loading, setLoading] = useState(false);
-//   const addProductToCart = (id) => {
-//     setLoading(true);
-//     addToCard(items.id)?.then((res) => {
-//       message.success(`${items?.title} Products has been added`);
-//     });
-//     setLoading(false);
-//   };
-
-//   return (
-//     <Button loading={loading} onClick={addProductToCart} type="link">
-//       Add To Card
-//     </Button>
-//   );
-// };
-
-// export default Products;
-
 import {
   Badge,
   Button,
@@ -109,6 +6,7 @@ import {
   List,
   message,
   Rate,
+  Select,
   Spin,
   Typography,
 } from "antd";
@@ -120,26 +18,70 @@ import { useParams } from "react-router-dom";
 function Products() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [sortedOrder, setSortedOrder] = useState("az");
   const params = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
-      const res = params?.categoryID
-        ? await getProductsByCategory(params?.categoryID)
-        : await allProducts();
-        setItems(res?.products)
-        setLoading(false)
+      setLoading(true);
+      try {
+        const res = params?.categoryID
+          ? await getProductsByCategory(params?.categoryID)
+          : await allProducts();
+        setItems(res?.products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        message.error("Failed to fetch products. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
-  }, [params]);
+  }, [params?.categoryID]);
+
+  const getSortedItems = () => {
+    let sortedItems = [...items];
+    sortedItems.sort((a, b) => {
+      const aTitle = a.title.toLowerCase();
+      const bTitle = b.title.toLowerCase();
+      if (sortedOrder === "az") {
+        return aTitle > bTitle ? 1 : aTitle === bTitle ? 0 : -1;
+      } else if (sortedOrder === "za") {
+        return aTitle < bTitle ? 1 : aTitle === bTitle ? 0 : -1;
+      } else if (sortedOrder === "low") {
+        return a.price > b.price ? 1 : a.price === b.price ? 0 : -1;
+      } else if (sortedOrder === "high") {
+        return a.price < b.price ? 1 : a.price === b.price ? 0 : -1;
+      }
+    });
+    return sortedItems;
+  };
 
   if (loading) {
-    return <Spin spinning></Spin>;
+    return (
+      <div className="centeredSpinner">
+        <Spin spinning />
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className="productsContainer">
+      <div>
+        <Typography.Text style={{ fontSize: "18px" }}>
+          View Item Sorted By:{" "}
+        </Typography.Text>
+        <Select
+          onChange={(value) => setSortedOrder(value)}
+          defaultValue={"az"}
+          options={[
+            { label: "Alphabetacally a-z", value: "az" },
+            { label: "Alphabetacally z-a", value: "za" },
+            { label: "Price low to high", value: "low" },
+            { label: "Price high to low", value: "high" },
+          ]}
+        ></Select>
+      </div>
       <List
         grid={{ column: 3 }}
         renderItem={(products, key) => {
@@ -147,7 +89,7 @@ function Products() {
             <Badge.Ribbon
               className="itemCardBadge"
               color="red"
-              text={products?.discountPercentage}
+              text={`${products?.discountPercentage}% Off`}
             >
               <Card
                 className="itemCard"
@@ -188,7 +130,7 @@ function Products() {
             </Badge.Ribbon>
           );
         }}
-        dataSource={items}
+        dataSource={getSortedItems()}
       ></List>
     </div>
   );
@@ -196,7 +138,7 @@ function Products() {
 
 const AddToCartProducts = ({ item }) => {
   const addProducts = () => {
-    addToCart(item?.id)?.then((res) => {
+    addToCart(item?.id)?.then(() => {
       message.success(`${item?.title} has been added Successfully`);
     });
   };
