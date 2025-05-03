@@ -4,7 +4,7 @@ import AppRoute from '../Routes/AppRoute'
 function PageContent() {
   return (
     <div className='PageContent'>
-        <AppRoute/>        
+      <AppRoute/>
     </div>
   )
 }

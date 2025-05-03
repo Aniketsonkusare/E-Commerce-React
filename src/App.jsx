@@ -1,7 +1,7 @@
 import React from "react";
-import Header from "./Components/Header/Header";
-import PageContent from "./Components/Pagecontent/PageContent";
-import Footer from "./Components/Footer/Footer";
+import Header from "../src/Components/Header/Header";
+import Footer from "../src/Components/Footer/Footer";
+import PageContent from "../src/Components/Pagecontent/PageContent";
 import "./App.css";
 import { BrowserRouter } from "react-router-dom";
 

@@ -1,12 +1,12 @@
-import React from "react";
-import Products from "../../Components/Products/Products";
+import React from 'react'
+import Products from '../../Components/Products/Products'
 
 function Category() {
   return (
     <div>
-        <Products/>
+      <Products/>
     </div>
-  );
+  )
 }
 
-export default Category;
+export default Category
