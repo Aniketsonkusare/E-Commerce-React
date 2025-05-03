@@ -6,8 +6,13 @@ export const getProductsByCategory = (category) => {
   return fetch(`https://dummyjson.com/products/category/${category}`)
     .then((res) => res.json())
     .then((res) => {
-      return res
-    })
+      return res;
+    });
+};
+
+export const getCart = () => {
+  return fetch("https://dummyjson.com/carts/1")
+    .then((res) => res.json());
 };
 
 export const addToCart = (id) => {
